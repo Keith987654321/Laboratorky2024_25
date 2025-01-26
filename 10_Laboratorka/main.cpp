@@ -149,7 +149,7 @@ int main()
 {
     Node* head = new Node{nullptr, 0};
     int n;
-    cout << "Введите длину списка: ";
+    cout << "Enter an array length: ";
     cin >> n;
     makeList(head,  n);
     

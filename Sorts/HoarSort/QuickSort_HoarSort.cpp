@@ -1,7 +1,7 @@
 #include <iostream>
 
 
-int PartOfSortHoara(int left, int right, int* arr) {
+int PartOfHoaraSort(int* arr, int left, int right) {
     int pivot = arr[(left + right) / 2];
     while (left <= right) {
         while(arr[left] < pivot) left++;
@@ -18,29 +18,27 @@ int PartOfSortHoara(int left, int right, int* arr) {
 }
 
 
-void QuickSortHoara(int start, int end, int* arr) {
+void HoaraSort(int* arr, int start, int end) {
     if (start >= end) return;
-    int rightStart = PartOfSortHoara(start, end, arr);
-    QuickSortHoara(start, rightStart-1, arr);
-    QuickSortHoara(rightStart, end, arr);
+    int rightStart = PartOfHoaraSort(arr, start, end);
+    HoaraSort(arr, 0, rightStart - 1);
+    HoaraSort(arr, rightStart, end);
 }
 
 
-void QuickSortHoara(int* arr, int length) {
-    QuickSortHoara(0, length - 1, arr);
+void QuickSort(int* arr, int arrayLength) {
+    HoaraSort(arr, 0, arrayLength - 1);
 }
-
 
 
 int main() {
+    const int LENGTH = 7;
+    int mass[LENGTH] = {4, 3, 5, 9, 1, 2, 1};
+    QuickSort(mass, LENGTH);
 
-    const int length = 7;
-    int mass[length] = {4, 3, 5, 9, 1, 2, 1};
-    QuickSortHoara(mass, length);
-
-    for (int i = 0; i <length; i++)
-    {
+    for (int i = 0; i < LENGTH; i++) {
         std::cout << mass[i] << std::endl;
     }
+    
     return 0;
 }

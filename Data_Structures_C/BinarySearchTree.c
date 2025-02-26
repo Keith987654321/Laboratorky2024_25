@@ -55,7 +55,7 @@ struct Node *GetMin(struct Node *Node) {
 struct Node *GetMax(struct Node *Node) {
   if (Node == NULL) return NULL;
   if (Node->right == NULL) return Node;
-  return GetMin(Node->right);
+  return GetMax(Node->right);
 }
 
 struct Node *Delete(struct Node *Node, int value) {
@@ -66,7 +66,7 @@ struct Node *Delete(struct Node *Node, int value) {
     if (Node->right == NULL || Node->left == NULL) 
       Node = (Node->left == NULL) ? Node->right : Node->left;
     else {
-      struct Node *MaxInLeft = GetMax(Node);
+      struct Node *MaxInLeft = GetMax(Node->left);
       Node->data = MaxInLeft->data;
       Node->left = Delete(Node->left, MaxInLeft->data);
     }

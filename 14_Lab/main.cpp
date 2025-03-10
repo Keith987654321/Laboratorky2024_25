@@ -88,46 +88,42 @@ class BigInt {
 
         BigInt& operator*=(const BigInt& other) {
             short new_arr_len = _length + other._length;
-            //char *new_arr = new char(new_arr_len);
-            BigInt new_big_int(new_arr_len + 8);
-            new_big_int.MakeNulls(new_arr_len);
-            //new_big_int._data[_length] = '0';
-            short carry = 0;
+            CheckCapacity(new_arr_len + 1);
+            char *new_arr = new char[_capacity];
+
+            for (int i = 0; i < new_arr_len + 1; i++) { new_arr[i] = '0'; }
+
+            short carry, sum_carry = 0, temp_j = 0;;
             for (int i = 0; i < other._length; i++) {
                 for (int j = 0; j < _length; j++) {
-                    short temporal = static_cast<short>((other._data[i] - '0') * (_data[j] - '0')) + carry;
-                    carry = 0;
-                    if (9 < temporal && temporal < 100) { carry = temporal / 10; } 
-                    temporal %= 10;
-                    /*
-                    for (int i = 0; i < other._length; i++) {
-                        short tmp = static_cast<short>((_data[i] - '0') + (other._data[i] - '0')) + carry;
-                        carry = 0;
-                        if (9 < tmp && tmp < 100) { carry = tmp / 10; }
-                        _data[i] = static_cast<char>((tmp % 10) + '0');
+                    short tmp = static_cast<short>((_data[j] - '0') * (other._data[i] - '0')) + carry + sum_carry;
+                    sum_carry = 0;
+                    carry = tmp / 10;
+                    if (tmp > 9) { 
+                        tmp = tmp % 10;
                     }
-                    */
-                    short tmp_carry = 0;
-                    short tmp = static_cast<short>(new_big_int._data[i + j] - '0') + temporal + tmp_carry;
-                    tmp_carry = 0;
-                    if (9 < tmp && tmp < 100) { tmp_carry = tmp / 10; }
-                    //new_big_int._data[]
-
-                    for (int k = i + j; k < new_arr_len; k++) {
-                        if (tmp_carry == 0) { break; }
-                        short tmp = static_cast<short>(new_big_int._data[k] - '0') + tmp_carry;
-                        tmp_carry = 0;
-                        if (9 < tmp && tmp < 100) { tmp_carry = tmp / 10; }
-                        new_big_int._data[k] = static_cast<char>((tmp % 10) + '0');
+                    short sum_tmp = static_cast<short>(new_arr[i + j] - '0') + tmp;
+                    sum_carry = sum_tmp / 10; 
+                    if (sum_tmp > 9) { 
+                        sum_tmp = sum_tmp % 10; 
                     }
-                    if (tmp_carry != 0) { new_big_int._data[new_arr_len] = static_cast<char>(carry + '0'); }
+                    
+                    new_arr[i + j] = static_cast<char>(sum_tmp + '0');
+                    temp_j = j + 1;
                 }
+                if (carry != 0) { new_arr[i + temp_j] = static_cast<char>(carry + '0'); carry = 0; } 
+                if (sum_carry != 0) { new_arr[i + temp_j] = new_arr[i + temp_j] + static_cast<char>(sum_carry); sum_carry = 0; }
             }
-            _length = new_big_int._length;
-            _capacity = new_big_int._capacity;
-            swap(_data, new_big_int._data);
-            delete[] new_big_int._data;
-            
+            if (new_arr[new_arr_len - 1] == '0') { new_arr_len--; }
+            new_arr[new_arr_len] = 0;
+
+            char *tmp_arr = _data;
+            _data = new_arr;
+            new_arr = tmp_arr;
+            delete[] new_arr;
+
+            _length = new_arr_len;
+
             return *this;
         }
 
@@ -168,7 +164,7 @@ class BigInt {
 
             if (_data[_length] != '0') { _length++; }
             _data[_length] = 0;
-            //BigInt c = *this;
+            
             return *this;
         }
 
@@ -180,8 +176,10 @@ class BigInt {
 };
 
 int main() {
-    BigInt a("11");
-    BigInt b = "2";
+    BigInt a("999999999999999800000000000000011");
+    BigInt b = "999999999999999800000000000000011";
+    //BigInt a("199");
+    //BigInt b = "11";
     a *= b;
     //BigInt c(3);
     //cout << b.length() << endl;
@@ -195,6 +193,45 @@ int main() {
 for (int i = 0; i < _length; i++) {
                 
 }
+
+BigInt& operator*=(const BigInt& other) {
+            short new_arr_len = _length + other._length;
+            CheckCapacity(new_arr_len + 1);
+            char *new_arr = new char[_capacity];
+
+            for (int i = 0; i < new_arr_len + 1; i++) { new_arr[i] = '0'; }
+
+            short carry, sum_carry = 0;
+            for (int i = 0; i < other._length; i++) {
+                //carry = 0; sum_carry = 0;
+                for (int j = 0; j < _length; j++) {
+                    short tmp = static_cast<short>((_data[j] - '0') * (other._data[i] - '0')) + carry + sum_carry;
+                    sum_carry = 0;
+                    carry = tmp / 10;
+                    if (tmp > 9) { 
+                        tmp = tmp % 10;
+                    }
+                    short sum_tmp = static_cast<short>(new_arr[i + j] - '0') + tmp;
+                    sum_carry = sum_tmp / 10; 
+                    if (sum_tmp > 9) { 
+                        sum_tmp = sum_tmp % 10; 
+                    }
+                    
+                    new_arr[i + j] = static_cast<char>(sum_tmp + '0');
+                }
+            }
+            if (new_arr[new_arr_len - 1] == '0') { new_arr_len--; }
+            new_arr[new_arr_len] = 0;
+
+            char *tmp_arr = _data;
+            _data = new_arr;
+            new_arr = tmp_arr;
+            delete[] new_arr;
+
+            _length = new_arr_len;
+
+            return *this;
+        }
 
 BigInt& operator+=(const BigInt& other) {
             CheckCapacity(other._length + 1); // потом попробовать убрать единицу

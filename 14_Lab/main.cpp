@@ -86,47 +86,6 @@ class BigInt {
             fputc('\n', stdout);
         }
 
-        BigInt& operator*=(const BigInt& other) {
-            short new_arr_len = _length + other._length;
-            CheckCapacity(new_arr_len + 1);
-            char *new_arr = new char[_capacity];
-
-            for (int i = 0; i < new_arr_len + 1; i++) { new_arr[i] = '0'; }
-
-            short carry, sum_carry = 0, temp_j = 0;;
-            for (int i = 0; i < other._length; i++) {
-                for (int j = 0; j < _length; j++) {
-                    short tmp = static_cast<short>((_data[j] - '0') * (other._data[i] - '0')) + carry + sum_carry;
-                    sum_carry = 0;
-                    carry = tmp / 10;
-                    if (tmp > 9) { 
-                        tmp = tmp % 10;
-                    }
-                    short sum_tmp = static_cast<short>(new_arr[i + j] - '0') + tmp;
-                    sum_carry = sum_tmp / 10; 
-                    if (sum_tmp > 9) { 
-                        sum_tmp = sum_tmp % 10; 
-                    }
-                    
-                    new_arr[i + j] = static_cast<char>(sum_tmp + '0');
-                    temp_j = j + 1;
-                }
-                if (carry != 0) { new_arr[i + temp_j] = static_cast<char>(carry + '0'); carry = 0; } 
-                if (sum_carry != 0) { new_arr[i + temp_j] = new_arr[i + temp_j] + static_cast<char>(sum_carry); sum_carry = 0; }
-            }
-            if (new_arr[new_arr_len - 1] == '0') { new_arr_len--; }
-            new_arr[new_arr_len] = 0;
-
-            char *tmp_arr = _data;
-            _data = new_arr;
-            new_arr = tmp_arr;
-            delete[] new_arr;
-
-            _length = new_arr_len;
-
-            return *this;
-        }
-
         BigInt& operator+=(const BigInt& other) { 
             CheckCapacity(other._length + 1); //  + 1 потому что потом можем отодвинуть 
             bool flag = true;                // символ окончания строки на один элемент вправо
@@ -173,14 +132,63 @@ class BigInt {
             a += other;
             return a; 
         }
+
+        BigInt& operator*=(const BigInt& other) {
+            short new_arr_len = _length + other._length;
+            CheckCapacity(new_arr_len + 1);
+            char *new_arr = new char[_capacity];
+
+            for (int i = 0; i < new_arr_len + 1; i++) { new_arr[i] = '0'; }
+
+            short carry = 0, sum_carry = 0, temp_j = 0;;
+            for (int i = 0; i < other._length; i++) {
+                for (int j = 0; j < _length; j++) {
+                    short tmp = static_cast<short>((_data[j] - '0') * (other._data[i] - '0')) + carry + sum_carry;
+                    sum_carry = 0;
+                    carry = tmp / 10;
+                    if (tmp > 9) { 
+                        tmp = tmp % 10;
+                    }
+                    short sum_tmp = static_cast<short>(new_arr[i + j] - '0') + tmp;
+                    sum_carry = sum_tmp / 10; 
+                    if (sum_tmp > 9) { 
+                        sum_tmp = sum_tmp % 10; 
+                    }
+                    
+                    new_arr[i + j] = static_cast<char>(sum_tmp + '0');
+                    temp_j = j + 1;
+                }
+                if (carry != 0) { new_arr[i + temp_j] = static_cast<char>(carry + '0'); carry = 0; } 
+                if (sum_carry != 0) { new_arr[i + temp_j] = new_arr[i + temp_j] + static_cast<char>(sum_carry); sum_carry = 0; }
+            }
+            if (new_arr[new_arr_len - 1] == '0') { new_arr_len--; }
+            new_arr[new_arr_len] = 0;
+
+            char *tmp_arr = _data;
+            _data = new_arr;
+            new_arr = tmp_arr;
+            delete[] new_arr;
+
+            _length = new_arr_len;
+
+            return *this;
+        }
+
+        BigInt operator*(const BigInt& other) {
+            BigInt a = *this;
+            a *= other;
+            return a;
+        }
 };
 
 int main() {
-    BigInt a("999999999999999800000000000000011");
-    BigInt b = "999999999999999800000000000000011";
+    BigInt a("12345");
+    BigInt b = "2";
     //BigInt a("199");
     //BigInt b = "11";
-    a *= b;
+    a = a * b;
+    cout << a.length() << endl;
+    cout << a.capacity() << endl;
     //BigInt c(3);
     //cout << b.length() << endl;
     //cout << b.length() << endl;

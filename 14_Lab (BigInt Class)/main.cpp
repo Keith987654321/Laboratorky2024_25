@@ -6,6 +6,7 @@ class BigInt {
         char* _data = nullptr;
         size_t _capacity;
         size_t _length;
+        bool _isNegative;
 
         void ExtendCapacity(size_t x = 8) {
             char *tmp = _data;
@@ -29,6 +30,88 @@ class BigInt {
             }
             _data[n] = 0;
             _length = n;
+        }
+
+        BigInt& Sum(const BigInt& other) {
+            CheckCapacity(other._length + 1); 
+            bool flag = true;                
+            short carry = 0;
+            if (other._length > _length) { MakeNulls(other._length); } 
+            else { flag = false; }
+            _data[_length] = '0';
+
+            if (flag) {
+                for (int i = 0; i < other._length; i++) {
+                     short tmp = static_cast<short>((_data[i] - '0') + (other._data[i] - '0')) + carry;
+                    carry = 0;
+                    if (9 < tmp && tmp < 100) { carry = tmp / 10; }
+                    _data[i] = static_cast<char>((tmp % 10) + '0');
+                }
+                if (carry != 0) { _data[_length] = static_cast<char>(carry + '0'); }
+            }
+
+            else {
+                for (int i = 0; i < other._length; i++) {
+                    short tmp = static_cast<short>((_data[i] - '0') + (other._data[i] - '0')) + carry;
+                    carry = 0;
+                    if (9 < tmp && tmp < 100) { carry = tmp / 10; }
+                    _data[i] = static_cast<char>((tmp % 10) + '0');
+                }
+                for (int i = other._length; i < _length; i++) {
+                    if (carry == 0) { break; }
+                    short tmp = static_cast<short>(_data[i] - '0') + carry;
+                    carry = 0;
+                    if (9 < tmp && tmp < 100) { carry = tmp / 10; }
+                    _data[i] = static_cast<char>((tmp % 10) + '0');
+                }
+                if (carry != 0) { _data[_length] = static_cast<char>(carry + '0'); }
+            }
+
+            if (_data[_length] != '0') { _length++; }
+            _data[_length] = 0;
+
+            return *this;
+        }
+
+        BigInt& Multiplication(const BigInt& other) {
+            short new_arr_len = _length + other._length;
+            CheckCapacity(new_arr_len + 1);
+            char *new_arr = new char[_capacity];
+
+            for (int i = 0; i < new_arr_len + 1; i++) { new_arr[i] = '0'; }
+
+            short carry = 0, sum_carry = 0, temp_j = 0;;
+            for (int i = 0; i < other._length; i++) {
+                for (int j = 0; j < _length; j++) {
+                    short tmp = static_cast<short>((_data[j] - '0') * (other._data[i] - '0')) + carry + sum_carry;
+                    sum_carry = 0;
+                    carry = tmp / 10;
+                    if (tmp > 9) { 
+                        tmp = tmp % 10;
+                    }
+                    short sum_tmp = static_cast<short>(new_arr[i + j] - '0') + tmp;
+                    sum_carry = sum_tmp / 10; 
+                    if (sum_tmp > 9) { 
+                        sum_tmp = sum_tmp % 10; 
+                    }
+                    
+                    new_arr[i + j] = static_cast<char>(sum_tmp + '0');
+                    temp_j = j + 1;
+                }
+                if (carry != 0) { new_arr[i + temp_j] = static_cast<char>(carry + '0'); carry = 0; } 
+                if (sum_carry != 0) { new_arr[i + temp_j] = new_arr[i + temp_j] + static_cast<char>(sum_carry); sum_carry = 0; }
+            }
+            if (new_arr[new_arr_len - 1] == '0') { new_arr_len--; }
+            new_arr[new_arr_len] = 0;
+
+            char *tmp_arr = _data;
+            _data = new_arr;
+            new_arr = tmp_arr;
+            delete[] new_arr;
+
+            _length = new_arr_len;
+
+            return *this;
         }
 
     public:
@@ -87,44 +170,7 @@ class BigInt {
         }
 
         BigInt& operator+=(const BigInt& other) { 
-            CheckCapacity(other._length + 1); //  + 1 потому что потом можем отодвинуть 
-            bool flag = true;                // символ окончания строки на один элемент вправо
-            short carry = 0;
-            if (other._length > _length) { MakeNulls(other._length); } 
-            else { flag = false; }
-            _data[_length] = '0';
-
-            if (flag) {
-                for (int i = 0; i < other._length; i++) {
-                     short tmp = static_cast<short>((_data[i] - '0') + (other._data[i] - '0')) + carry;
-                    carry = 0;
-                    if (9 < tmp && tmp < 100) { carry = tmp / 10; }
-                    _data[i] = static_cast<char>((tmp % 10) + '0');
-                }
-                if (carry != 0) { _data[_length] = static_cast<char>(carry + '0'); }
-            }
-
-            else {
-                for (int i = 0; i < other._length; i++) {
-                    short tmp = static_cast<short>((_data[i] - '0') + (other._data[i] - '0')) + carry;
-                    carry = 0;
-                    if (9 < tmp && tmp < 100) { carry = tmp / 10; }
-                    _data[i] = static_cast<char>((tmp % 10) + '0');
-                }
-                for (int i = other._length; i < _length; i++) {
-                    if (carry == 0) { break; }
-                    short tmp = static_cast<short>(_data[i] - '0') + carry;
-                    carry = 0;
-                    if (9 < tmp && tmp < 100) { carry = tmp / 10; }
-                    _data[i] = static_cast<char>((tmp % 10) + '0');
-                }
-                if (carry != 0) { _data[_length] = static_cast<char>(carry + '0'); }
-            }
-
-            if (_data[_length] != '0') { _length++; }
-            _data[_length] = 0;
-            
-            return *this;
+            return this->Sum(other);
         }
 
         BigInt operator+(const BigInt& other) {
@@ -134,44 +180,7 @@ class BigInt {
         }
 
         BigInt& operator*=(const BigInt& other) {
-            short new_arr_len = _length + other._length;
-            CheckCapacity(new_arr_len + 1);
-            char *new_arr = new char[_capacity];
-
-            for (int i = 0; i < new_arr_len + 1; i++) { new_arr[i] = '0'; }
-
-            short carry = 0, sum_carry = 0, temp_j = 0;;
-            for (int i = 0; i < other._length; i++) {
-                for (int j = 0; j < _length; j++) {
-                    short tmp = static_cast<short>((_data[j] - '0') * (other._data[i] - '0')) + carry + sum_carry;
-                    sum_carry = 0;
-                    carry = tmp / 10;
-                    if (tmp > 9) { 
-                        tmp = tmp % 10;
-                    }
-                    short sum_tmp = static_cast<short>(new_arr[i + j] - '0') + tmp;
-                    sum_carry = sum_tmp / 10; 
-                    if (sum_tmp > 9) { 
-                        sum_tmp = sum_tmp % 10; 
-                    }
-                    
-                    new_arr[i + j] = static_cast<char>(sum_tmp + '0');
-                    temp_j = j + 1;
-                }
-                if (carry != 0) { new_arr[i + temp_j] = static_cast<char>(carry + '0'); carry = 0; } 
-                if (sum_carry != 0) { new_arr[i + temp_j] = new_arr[i + temp_j] + static_cast<char>(sum_carry); sum_carry = 0; }
-            }
-            if (new_arr[new_arr_len - 1] == '0') { new_arr_len--; }
-            new_arr[new_arr_len] = 0;
-
-            char *tmp_arr = _data;
-            _data = new_arr;
-            new_arr = tmp_arr;
-            delete[] new_arr;
-
-            _length = new_arr_len;
-
-            return *this;
+            return this->Multiplication(other);
         }
 
         BigInt operator*(const BigInt& other) {
@@ -179,22 +188,71 @@ class BigInt {
             a *= other;
             return a;
         }
+
+        BigInt& operator-=(const BigInt& other) {
+            
+            return *this;
+        }
+
+        bool operator<(const BigInt& other) {
+            if (_length < other._length) return true;
+            if (_length > other._length) return false;
+
+            for (int i = _length; i >= 0; i--) {
+                if (_data[i] < other._data[i]) return true;
+                if (_data[i] > other._data[i]) return false;
+            }
+            return false;
+        }
+
+        bool operator>=(const BigInt& other) {
+            return !(*this < other);
+        }
+
+        bool operator>(const BigInt& other) {
+            if (_length < other._length) return false;
+            if (_length > other._length) return true;
+
+            for (int i = _length; i >= 0; i--) {
+                if (_data[i] < other._data[i]) return false;
+                if (_data[i] > other._data[i]) return true;
+            }
+            return false;
+        }
+
+        bool operator<=(const BigInt& other) {
+            return !(*this > other);
+        }
+
+        bool operator==(const BigInt& other) {
+            if (_length != other._length) return false;
+
+            for (int i = 0; i < _length; i++) {
+                if (_data[i] != other._data[i]) return false;
+            }
+            return true;
+        }
+
+        bool operator!=(const BigInt& other) {
+            return !(*this == other);
+        }
 };
 
 int main() {
-    BigInt a("12345");
-    BigInt b = "2";
+    BigInt a("1000");
+    BigInt b = "1000";
     //BigInt a("199");
     //BigInt b = "11";
     a = a * b;
     cout << a.length() << endl;
-    cout << a.capacity() << endl;
+    cout << b.length() << endl;
     //BigInt c(3);
     //cout << b.length() << endl;
     //cout << b.length() << endl;
     //cout << c.length() << endl;
     //cout << c.capacity() << endl;
     a.print();
+    //cout << (a != b) << endl;
 }
 
 /* 

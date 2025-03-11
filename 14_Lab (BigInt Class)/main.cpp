@@ -114,8 +114,6 @@ class BigInt {
             return *this;
         }
 
-
-
     public:
         BigInt() = default;
 
@@ -206,6 +204,7 @@ class BigInt {
             for (int i = other._length; i < _length; i++) {
                 if (minus_next == 0) { break; }
                 short tmp = static_cast<short>(_data[i] - '0') - minus_next;
+                minus_next = 0;
                 if (tmp < 0) { 
                 minus_next = 1;
                 tmp += 10;
@@ -272,8 +271,8 @@ class BigInt {
 };
 
 int main() {
-    BigInt a("100000");
-    BigInt b = "1";
+    BigInt a("1010101");
+    BigInt b = "2";
     //BigInt a("199");
     //BigInt b = "11";
     a -= b;

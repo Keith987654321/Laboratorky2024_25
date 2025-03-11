@@ -31,7 +31,7 @@ class BigInt {
             _data[n] = 0;
             _length = n;
         }
-
+        
         BigInt& Sum(const BigInt& other) {
             CheckCapacity(other._length + 1); 
             bool flag = true;                
@@ -114,6 +114,8 @@ class BigInt {
             return *this;
         }
 
+
+
     public:
         BigInt() = default;
 
@@ -190,7 +192,38 @@ class BigInt {
         }
 
         BigInt& operator-=(const BigInt& other) {
-            
+            short minus_next = 0;
+            for (int i = 0; i < other._length; i++) {
+                short tmp = static_cast<short>((_data[i] - '0') - (other._data[i] - '0')) - minus_next;
+                minus_next = 0;
+                if (tmp < 0) { 
+                    minus_next = 1;
+                    tmp += 10;
+                }
+                _data[i] = static_cast<char>(tmp + '0');
+            }
+
+            for (int i = other._length; i < _length; i++) {
+                if (minus_next == 0) { break; }
+                short tmp = static_cast<short>(_data[i] - '0') - minus_next;
+                if (tmp < 0) { 
+                minus_next = 1;
+                tmp += 10;
+                }
+                _data[i] = static_cast<char>(tmp + '0');
+            }
+
+            for (int i = _length - 1; i >= 0; i--) {
+                if (_data[i] != '0') {  
+                    _length = i + 1;
+                    break; 
+                }
+                else { _length--; }
+            }
+
+            if (_length == 0) { _data[0] = '0'; _length++; }
+            _data[_length] = 0;
+
             return *this;
         }
 
@@ -239,15 +272,15 @@ class BigInt {
 };
 
 int main() {
-    BigInt a("1000");
-    BigInt b = "1000";
+    BigInt a("100000");
+    BigInt b = "1";
     //BigInt a("199");
     //BigInt b = "11";
-    a = a * b;
+    a -= b;
     cout << a.length() << endl;
     cout << b.length() << endl;
     //BigInt c(3);
-    //cout << b.length() << endl;
+    //cout << a.length() << endl;
     //cout << b.length() << endl;
     //cout << c.length() << endl;
     //cout << c.capacity() << endl;

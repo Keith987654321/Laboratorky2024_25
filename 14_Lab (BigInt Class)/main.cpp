@@ -153,7 +153,6 @@ public:
     BigInt() = default;
 
     BigInt(size_t capacity) {
-        //_isNegative = false;
         _capacity = capacity;
         _length = 0;
         _data = new char(_capacity);
@@ -176,7 +175,6 @@ public:
         }
         _capacity = _length + 8;
         _data = new char[_capacity];
-        //for (int i = start_point; i < _length + start_point; i++) { _data[i - start_point] = number[_length + start_point - i - 1]; }
         for (int i = _length - 1; i >= 0; i--) {
             _data[_length - i - 1] = number[i + start_point];
         }
@@ -334,22 +332,11 @@ public:
 };
 
 int main() {
-    //BigInt a = "-12345";
     BigInt a("100");
     BigInt b = "10";
-    //BigInt a("199");
-    //BigInt b = "11";
     a *= b;
-    //cout << a.length() << endl;
-    //cout << b.length() << endl;
-    //BigInt c(3);
-    //cout << a.length() << endl;
-    //cout << b.length() << endl;
-    //cout << c.length() << endl;
-    //cout << c.capacity() << endl;
     cout << a.length() << endl;
     a.print();
-    //cout << (a != b) << endl;
 }
 
 /*

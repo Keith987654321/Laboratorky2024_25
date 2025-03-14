@@ -56,6 +56,24 @@ private:
         new_arr[length] = 0;
         return new_arr;
     } 
+    
+    bool AbsLess(const BigInt& other) {
+        bool result;
+        if (_length < other._length) result = true;
+        else if (_length > other._length) result = false;
+        else {
+            for (int i = _length - 1; i >= 0; i--) {
+                if (_data[i] < other._data[i]) { result = true; break; }
+                if (_data[i] > other._data[i]) { result = false; break; }
+            }
+        }
+
+        return result;
+    }
+
+    bool AbsGreaterOrEqual(const BigInt& other) {
+        return !(this->AbsLess(other));
+    }
 
     BigInt& Sum(const BigInt& other) {
         CheckCapacity(other._length + 1);
@@ -268,7 +286,7 @@ public:
         else if (_isNegative && other._isNegative) { return this->Sum(other); }
 
         else if (!_isNegative && other._isNegative) { 
-            if (*this >= other) { return this->Subtraction(other); }
+            if (this->AbsGreaterOrEqual(other)) { return this->Subtraction(other); }
             else {
                 BigInt temp = *this;
                 *this = other;
@@ -277,7 +295,7 @@ public:
         }
 
         else {
-            if (*this >= other) { return this->Subtraction(other); }
+            if (this->AbsGreaterOrEqual(other)) { return this->Subtraction(other); }
             else {
                 BigInt temp = *this;
                 *this = other;
@@ -293,7 +311,7 @@ public:
         else if (_isNegative && other._isNegative) { return this->Sum(other); }
 
         else if (!_isNegative && other._isNegative) { 
-            if (*this >= other) { return this->Subtraction(other); }
+            if (this->AbsGreaterOrEqual(other)) { return this->Subtraction(other); }
             else {
                 BigInt temp = *this;
                 *this = other;
@@ -302,7 +320,7 @@ public:
         }
 
         else {
-            if (*this >= other) { return this->Subtraction(other); }
+            if (this->AbsGreaterOrEqual(other)) { return this->Subtraction(other); }
             else {
                 BigInt temp = *this;
                 *this = other;
@@ -319,7 +337,7 @@ public:
 
     BigInt& operator-=(const BigInt& other) {
         if (!_isNegative && !other._isNegative) { 
-            if (*this >= other) { return this->Subtraction(other); }
+            if (this->AbsGreaterOrEqual(other)) { return this->Subtraction(other); }
             else {
                 BigInt temp = *this;
                 *this = other;
@@ -329,7 +347,7 @@ public:
         }
         
         else if (_isNegative && other._isNegative) { 
-            if (*this >= other) { 
+            if (this->AbsGreaterOrEqual(other)) { 
                 _isNegative = true;
                 return this->Subtraction(other); 
             }
@@ -351,7 +369,7 @@ public:
     BigInt& operator-=(size_t number) {
         BigInt other = number;
         if (!_isNegative && !other._isNegative) { 
-            if (*this >= other) { return this->Subtraction(other); }
+            if (this->AbsGreaterOrEqual(other)) { return this->Subtraction(other); }
             else {
                 BigInt temp = *this;
                 *this = other;
@@ -361,7 +379,7 @@ public:
         }
         
         else if (_isNegative && other._isNegative) { 
-            if (*this >= other) { 
+            if (this->AbsGreaterOrEqual(other)) { 
                 _isNegative = true;
                 return this->Subtraction(other); 
             }
@@ -426,32 +444,56 @@ public:
     }
 
     bool operator<(const BigInt& other) {
-        bool result;
-        if (_length < other._length) result = true;
-        else if (_length > other._length) result = false;
-        else {
-            for (int i = _length - 1; i >= 0; i--) {
-                if (_data[i] < other._data[i]) { result = true; break; }
-                if (_data[i] > other._data[i]) { result = false; break; }
+        if (!_isNegative && !other._isNegative) {
+            if (_length > other._length) { return false; }
+            if (_length < other._length) { return true; }
+
+            for (int i = _length - 1; i >= 0; --i) {
+                if (_data[i] > other._data[i]) { return false; }
+                if (_data[i] < other._data[i]) { return true; }
             }
         }
-        if (other._isNegative) { result = !result; }
-        return result;
+
+        else if (_isNegative && other._isNegative) {
+            if (_length > other._length) { return true; }
+            if (_length < other._length) { return false; }
+
+            for (int i = _length - 1; i >= 0; --i) {
+                if (_data[i] > other._data[i]) { return true; }
+                if (_data[i] < other._data[i]) { return false; }
+            }
+        }
+
+        else if (!_isNegative && other._isNegative) { return false; }
+
+        return false;
     }
 
     bool operator<(size_t number) {
         BigInt other = number;
-        bool result;
-        if (_length < other._length) result = true;
-        else if (_length > other._length) result = false;
-        else {
-            for (int i = _length - 1; i >= 0; i--) {
-                if (_data[i] < other._data[i]) { result = true; break; }
-                if (_data[i] > other._data[i]) { result = false; break; }
+        if (!_isNegative && !other._isNegative) {
+            if (_length > other._length) { return false; }
+            if (_length < other._length) { return true; }
+
+            for (int i = _length - 1; i >= 0; --i) {
+                if (_data[i] > other._data[i]) { return false; }
+                if (_data[i] < other._data[i]) { return true; }
             }
         }
-        if (other._isNegative) { result = !result; }
-        return result;
+
+        else if (_isNegative && other._isNegative) {
+            if (_length > other._length) { return true; }
+            if (_length < other._length) { return false; }
+
+            for (int i = _length - 1; i >= 0; --i) {
+                if (_data[i] > other._data[i]) { return true; }
+                if (_data[i] < other._data[i]) { return false; }
+            }
+        }
+
+        else if (!_isNegative && other._isNegative) { return false; }
+
+        else { return true; }
     }
 
     bool operator>=(const BigInt& other) {
@@ -464,32 +506,56 @@ public:
     }
 
     bool operator>(const BigInt& other) {
-        bool result;
-        if (_length < other._length) result = false;
-        else if (_length > other._length) result = true;
-        else {
-            for (int i = _length - 1; i >= 0; i--) {
-                if (_data[i] < other._data[i]) { result = false; break; }
-                if (_data[i] > other._data[i]) { result = true; break; }
+        if (!_isNegative && !other._isNegative) {
+            if (_length > other._length) { return true; }
+            if (_length < other._length) { return false; }
+
+            for (int i = _length - 1; i >= 0; --i) {
+                if (_data[i] > other._data[i]) { return true; }
+                if (_data[i] < other._data[i]) { return false; }
             }
         }
-        if (other._isNegative) { result = !result; }
-        return result;
+
+        else if (_isNegative && other._isNegative) {
+            if (_length > other._length) { return false; }
+            if (_length < other._length) { return true; }
+
+            for (int i = _length - 1; i >= 0; --i) {
+                if (_data[i] > other._data[i]) { return false; }
+                if (_data[i] < other._data[i]) { return true; }
+            }
+        }
+
+        else if (!_isNegative && other._isNegative) { return true; }
+
+        return false;
     }
 
     bool operator>(size_t number) {
         BigInt other = number;
-        bool result;
-        if (_length < other._length) result = false;
-        else if (_length > other._length) result = true;
-        else {
-            for (int i = _length - 1; i >= 0; i--) {
-                if (_data[i] < other._data[i]) { result = false; break; }
-                if (_data[i] > other._data[i]) { result = true; break; }
+        if (!_isNegative && !other._isNegative) {
+            if (_length > other._length) { return true; }
+            if (_length < other._length) { return false; }
+
+            for (int i = _length - 1; i >= 0; --i) {
+                if (_data[i] > other._data[i]) { return true; }
+                if (_data[i] < other._data[i]) { return false; }
             }
         }
-        if (other._isNegative) { result = !result; }
-        return result;
+
+        else if (_isNegative && other._isNegative) {
+            if (_length > other._length) { return false; }
+            if (_length < other._length) { return true; }
+
+            for (int i = _length - 1; i >= 0; --i) {
+                if (_data[i] > other._data[i]) { return false; }
+                if (_data[i] < other._data[i]) { return true; }
+            }
+        }
+
+        else if (!_isNegative && other._isNegative) { return true; }
+
+        else { return false; }
     }
 
     bool operator<=(const BigInt& other) {

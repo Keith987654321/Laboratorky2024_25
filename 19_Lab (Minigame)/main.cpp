@@ -1,21 +1,96 @@
 #pragma once
 #include <iostream>
 #include <SFML/Graphics.hpp>
-//#include <thread>
-//#include <chrono>
+#include <windows.h>
+#include <mmsystem.h>
+#include <ctime>
 #include "list_array.hpp"
 
-#define FIELD_SIZE 10
+#pragma comment(lib, "winmm.lib")
 
-static double lastUpdateTime = 0;
+#define FIELD_SIZE 10
+#define SPEED 3
+#define ADD_TO_SCORE 500
+
+static long long score = 0;
 
 class Snake {
     private:
-        short speed = 2;
+        short speed = SPEED;
         short length;
         char direction, prev_direction, next_direction;
         Node* body_info = nullptr;
+
+        void MoveRight() {
+            short x_prev = GetElemByIndex(body_info, 0)->x_coord;
+            short y_prev = GetElemByIndex(body_info, 0)->y_coord;
+            if (GetElemByIndex(body_info, 0)->x_coord + 1 >= FIELD_SIZE) { 
+                Restart();
+                return; 
+            }
+            if (WillMeetSelf(x_prev + 1, y_prev)) { 
+                Restart();
+                return;
+            }
+            else { GetElemByIndex(body_info, 0)->x_coord++; }
+
+            for (int i = 1; i < length; i++) {
+                std::swap(GetElemByIndex(body_info, i)->x_coord, x_prev);
+                std::swap(GetElemByIndex(body_info, i)->y_coord, y_prev);
+            }
+            tail_x_coord = x_prev;
+            tail_y_coord = y_prev;
+        }
+
+        void MoveLeft() {
+            short x_prev = GetElemByIndex(body_info, 0)->x_coord;
+            short y_prev = GetElemByIndex(body_info, 0)->y_coord;
+            if (GetElemByIndex(body_info, 0)->x_coord - 1 < 0) { Restart(); return; }
+            if (WillMeetSelf(x_prev - 1, y_prev)) { Restart(); return;}
+            else { GetElemByIndex(body_info, 0)->x_coord--; }
+
+            for (int i = 1; i < length; i++) {
+                std::swap(GetElemByIndex(body_info, i)->x_coord, x_prev);
+                std::swap(GetElemByIndex(body_info, i)->y_coord, y_prev);
+            }
+            tail_x_coord = x_prev;
+            tail_y_coord = y_prev;
+        }
+
+        void MoveUp() {
+            short x_prev = GetElemByIndex(body_info, 0)->x_coord;
+            short y_prev = GetElemByIndex(body_info, 0)->y_coord;
+            if (GetElemByIndex(body_info, 0)->y_coord - 1 < 0) { Restart(); return; }
+            if (WillMeetSelf(x_prev, y_prev - 1)) { Restart(); return;}
+            else { GetElemByIndex(body_info, 0)->y_coord--; }
+
+            for (int i = 1; i < length; i++) {
+                std::swap(GetElemByIndex(body_info, i)->x_coord, x_prev);
+                std::swap(GetElemByIndex(body_info, i)->y_coord, y_prev);
+            }
+            tail_x_coord = x_prev;
+            tail_y_coord = y_prev;
+        }
+
+        void MoveDown() {
+            short x_prev = GetElemByIndex(body_info, 0)->x_coord;
+            short y_prev = GetElemByIndex(body_info, 0)->y_coord;
+            if (GetElemByIndex(body_info, 0)->y_coord + 1 >= FIELD_SIZE) { Restart(); return; }
+            if (WillMeetSelf(x_prev, y_prev + 1)) { Restart(); return;}
+            else { GetElemByIndex(body_info, 0)->y_coord++; }
+
+            for (int i = 1; i < length; i++) {
+                std::swap(GetElemByIndex(body_info, i)->x_coord, x_prev);
+                std::swap(GetElemByIndex(body_info, i)->y_coord, y_prev);
+            }
+            tail_x_coord = x_prev;
+            tail_y_coord = y_prev;
+        }
+
     public:
+        short tail_x_coord = 0;
+        short tail_y_coord = 0;
+
         Snake() {
             length = 1;
             direction = 'D';
@@ -37,6 +112,19 @@ class Snake {
                 ClearList(body_info);
                 delete body_info;
             }
+        }
+
+        void Restart() {
+            ClearList(body_info);
+            length = 3;
+            speed = SPEED;
+            direction = 'D';
+            prev_direction = '0';
+            next_direction = 'D';
+            for (int i = 0; i < length; i++) {
+                PushBack(body_info, length - i - 1, 0);
+            }
+            score = 0;
         }
 
         short len() { return length; }
@@ -62,72 +150,20 @@ class Snake {
             prev_direction = direction;
             direction = new_dir; 
         }
-        
+
         bool WillMeetSelf(short x_next, short y_next) {
             for (int i = 0; i < length - 1; i++) {
                 if (GetElemByIndex(body_info, i)->x_coord == x_next && GetElemByIndex(body_info, i)->y_coord == y_next) {
-                    std::cout << GetElemByIndex(body_info, i)->x_coord << " == " << x_next << std::endl;
-                    std::cout << GetElemByIndex(body_info, i)->y_coord << " == " << y_next << std::endl;
+                    //std::cout << GetElemByIndex(body_info, i)->x_coord << " == " << x_next << std::endl;
+                    //std::cout << GetElemByIndex(body_info, i)->y_coord << " == " << y_next << std::endl;
                     return true;
                 }
             }
             return false;
         }
-
-        void MoveRight() {
-            short x_prev = GetElemByIndex(body_info, 0)->x_coord;
-            short y_prev = GetElemByIndex(body_info, 0)->y_coord;
-            if (GetElemByIndex(body_info, 0)->x_coord + 1 >= FIELD_SIZE) { std::cout << "You're dead!\n"; return; }
-            if (WillMeetSelf(x_prev + 1, y_prev)) {std::cout << "You've killed your self\n"; return;}
-            else { GetElemByIndex(body_info, 0)->x_coord++; }
-
-            for (int i = 1; i < length; i++) {
-                std::swap(GetElemByIndex(body_info, i)->x_coord, x_prev);
-                std::swap(GetElemByIndex(body_info, i)->y_coord, y_prev);
-            }
-        }
-
-        void MoveLeft() {
-            short x_prev = GetElemByIndex(body_info, 0)->x_coord;
-            short y_prev = GetElemByIndex(body_info, 0)->y_coord;
-            if (GetElemByIndex(body_info, 0)->x_coord - 1 < 0) { std::cout << "You're dead!\n"; return; }
-            if (WillMeetSelf(x_prev - 1, y_prev)) {std::cout << "You've killed your self\n"; return;}
-            else { GetElemByIndex(body_info, 0)->x_coord--; }
-
-            for (int i = 1; i < length; i++) {
-                std::swap(GetElemByIndex(body_info, i)->x_coord, x_prev);
-                std::swap(GetElemByIndex(body_info, i)->y_coord, y_prev);
-            }
-        }
-
-        void MoveUp() {
-            short x_prev = GetElemByIndex(body_info, 0)->x_coord;
-            short y_prev = GetElemByIndex(body_info, 0)->y_coord;
-            if (GetElemByIndex(body_info, 0)->y_coord - 1 < 0) { std::cout << "You're dead!\n"; return; }
-            if (WillMeetSelf(x_prev, y_prev - 1)) {std::cout << "You've killed your self\n"; return;}
-            else { GetElemByIndex(body_info, 0)->y_coord--; }
-
-            for (int i = 1; i < length; i++) {
-                std::swap(GetElemByIndex(body_info, i)->x_coord, x_prev);
-                std::swap(GetElemByIndex(body_info, i)->y_coord, y_prev);
-            }
-        }
-
-        void MoveDown() {
-            short x_prev = GetElemByIndex(body_info, 0)->x_coord;
-            short y_prev = GetElemByIndex(body_info, 0)->y_coord;
-            if (GetElemByIndex(body_info, 0)->y_coord + 1 >= FIELD_SIZE) { std::cout << "You're dead!\n"; return; }
-            if (WillMeetSelf(x_prev, y_prev + 1)) {std::cout << "You've killed your self\n"; return;}
-            else { GetElemByIndex(body_info, 0)->y_coord++; }
-
-            for (int i = 1; i < length; i++) {
-                std::swap(GetElemByIndex(body_info, i)->x_coord, x_prev);
-                std::swap(GetElemByIndex(body_info, i)->y_coord, y_prev);
-            }
-        }
-
+        
         void MoveSnake() {
-            std::cout << "Direction: " << get_direction() << " Prev_Direction: " << get_prev_direction() << std::endl;
+            //std::cout << "Direction: " << get_direction() << " Prev_Direction: " << get_prev_direction() << std::endl;
             if (direction == 'D' && prev_direction != 'A') { MoveRight(); }
             else if (direction == 'A' && prev_direction != 'D') { MoveLeft(); }
             else if (direction == 'S' && prev_direction != 'W') { MoveDown(); }
@@ -137,6 +173,33 @@ class Snake {
                 MoveSnake();
             }
         }
+        
+        void EatItem(short x_spawn, short y_spawn) {
+            if (length < 25) { PushBack(body_info, x_spawn, y_spawn); length++; }
+            if (length > 3 && length % 4 == 0) { speed++; }
+            score += ADD_TO_SCORE;
+        }
+};
+
+struct Food {
+    short x_coord;
+    short y_coord;
+
+    
+    void ChangeFoodCoord(Snake &snake) {
+        while (true) {
+            x_coord = rand() % 10;
+            y_coord = rand() % 10;
+            if (!snake.WillMeetSelf(x_coord, y_coord) && !(x_coord < 3 && y_coord == 0)) { return; }
+        }
+    }
+
+    void CheckSnake(Snake &snake) {
+        if (snake[0]->x_coord == x_coord && snake[0]->y_coord == y_coord) {
+            snake.EatItem(snake.tail_x_coord, snake.tail_y_coord);
+            ChangeFoodCoord(snake);
+        }
+    }
 };
 
 void FillField(sf::RectangleShape field[FIELD_SIZE][FIELD_SIZE]) {
@@ -152,7 +215,7 @@ void FillField(sf::RectangleShape field[FIELD_SIZE][FIELD_SIZE]) {
     }
 }
 
-void DrawField(sf::RectangleShape field[FIELD_SIZE][FIELD_SIZE], sf::RenderWindow &window, Snake &snake) {
+void DrawField(sf::RectangleShape field[FIELD_SIZE][FIELD_SIZE], sf::RenderWindow &window, Snake &snake, Food &food) {
     for (int i = 0; i < FIELD_SIZE; i++) {
         for (int j = 0; j < FIELD_SIZE; j++) {
             field[i][j].setFillColor(sf::Color(80, 80, 80, 255));
@@ -160,11 +223,13 @@ void DrawField(sf::RectangleShape field[FIELD_SIZE][FIELD_SIZE], sf::RenderWindo
     }
 
     const Node *p = snake[0];
-    field[p->y_coord][p->x_coord].setFillColor(sf::Color(0, 240, 0, 255));
+    field[p->y_coord][p->x_coord].setFillColor(sf::Color(50, 240, 50, 255));
     for (int i = 1; i < snake.len(); i++) {
         const Node *p = snake[i];
-        field[p->y_coord][p->x_coord].setFillColor(sf::Color(255, 255, 0, 255));
+        field[p->y_coord][p->x_coord].setFillColor(sf::Color(255, 255, 50, 255));
     }
+    
+    field[food.y_coord][food.x_coord].setFillColor(sf::Color(137, 207, 240, 255));
 
     for (int i = 0; i < FIELD_SIZE; i++) {
         for (int j = 0; j < FIELD_SIZE; j++) {
@@ -191,19 +256,46 @@ void UpdateMovement(Snake &snake, sf::Clock &clock) {
 
 
 int main() {
+    srand(static_cast<unsigned int>(time(NULL)));
     sf::RenderWindow window(sf::VideoMode(1000, 1000), "Snake the game");
     window.setFramerateLimit(60);
 
     sf::RectangleShape field[FIELD_SIZE][FIELD_SIZE];
     FillField(field);
 
-    Snake snake(10);
+    sf::Font font;
+    if (!font.loadFromFile("arial.ttf"))
+    {
+        //return 1;
+    }
+    
+    
+    
+
+    sf::Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setString("SCORE: ");
+    scoreText.setCharacterSize(24);
+    scoreText.setPosition(sf::Vector2f(425.f, 0.f));
+
+    sf::Text numberText;
+    numberText.setFont(font);
+    numberText.setString(std::to_string(score));
+    numberText.setCharacterSize(24);
+    numberText.setPosition(sf::Vector2f(525.f, 0.f));
+
+    Snake snake(3);
     sf::Clock clock;
     
+    Food food;
+    food.ChangeFoodCoord(snake);
+
+    PlaySound(TEXT("SnakeGame.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+
     while (window.isOpen())
     {   
         sf::Event event;
-        
+
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
@@ -211,12 +303,19 @@ int main() {
         }
 
         window.clear(sf::Color::Black);
-      
-        DrawField(field, window, snake);
         
+        food.CheckSnake(snake);
+
         CheckInput(snake);
         
         UpdateMovement(snake, clock);
+
+        DrawField(field, window, snake, food);
+
+        window.draw(scoreText);
+
+        numberText.setString(std::to_string(score));
+        window.draw(numberText);
 
         window.display();
         
@@ -226,5 +325,3 @@ int main() {
     return 0;
 }
 
-//auto start = std::chrono::steady_clock::now();
-//std::this_thread::sleep_until(start + std::chrono::seconds(1));

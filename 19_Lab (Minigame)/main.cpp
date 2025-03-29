@@ -290,7 +290,7 @@ int main() {
     Food food;
     food.ChangeFoodCoord(snake);
 
-    PlaySound(TEXT("SnakeGame.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+    PlaySound(TEXT("Minigame.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 
     while (window.isOpen())
     {   

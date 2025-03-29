@@ -13,6 +13,7 @@
 #define ADD_TO_SCORE 500
 
 static long long score = 0;
+static long long max_score = 0;
 
 class Snake {
     private:
@@ -124,6 +125,7 @@ class Snake {
             for (int i = 0; i < length; i++) {
                 PushBack(body_info, length - i - 1, 0);
             }
+            if (score > max_score) { max_score = score; }
             score = 0;
         }
 
@@ -272,14 +274,26 @@ int main() {
     sf::Text scoreText;
     scoreText.setFont(font);
     scoreText.setString("SCORE: ");
-    scoreText.setCharacterSize(24);
-    scoreText.setPosition(sf::Vector2f(425.f, 0.f));
+    scoreText.setCharacterSize(18);
+    scoreText.setPosition(sf::Vector2f(425.f, 25.f));
 
     sf::Text numberText;
     numberText.setFont(font);
     numberText.setString(std::to_string(score));
-    numberText.setCharacterSize(24);
-    numberText.setPosition(sf::Vector2f(525.f, 0.f));
+    numberText.setCharacterSize(18);
+    numberText.setPosition(sf::Vector2f(500.f, 25.f));
+
+    sf::Text max_scoreText;
+    max_scoreText.setFont(font);
+    max_scoreText.setString("MAX SCORE: ");
+    max_scoreText.setCharacterSize(18);
+    max_scoreText.setPosition(sf::Vector2f(381.f, 0.f));
+
+    sf::Text max_numberText;
+    max_numberText.setFont(font);
+    max_numberText.setString(std::to_string(max_score));
+    max_numberText.setCharacterSize(18);
+    max_numberText.setPosition(sf::Vector2f(500.f, 0.f));
 
     Snake snake(3);
     sf::Clock clock;
@@ -314,6 +328,11 @@ int main() {
         numberText.setString(std::to_string(score));
         window.draw(numberText);
 
+        window.draw(max_scoreText);
+
+        max_numberText.setString(std::to_string(max_score));
+        window.draw(max_numberText);
+
         window.display();
         
         
@@ -321,4 +340,3 @@ int main() {
 
     return 0;
 }
-

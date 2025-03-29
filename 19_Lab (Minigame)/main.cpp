@@ -175,8 +175,8 @@ class Snake {
         }
         
         void EatItem(short x_spawn, short y_spawn) {
-            if (length < 25) { PushBack(body_info, x_spawn, y_spawn); length++; }
-            if (length > 3 && length % 4 == 0) { speed++; }
+            if (length < 20) { PushBack(body_info, x_spawn, y_spawn); length++; }
+            if (length >= 3 && length % 3 == 0) { speed++; }
             score += ADD_TO_SCORE;
         }
 };
@@ -258,7 +258,7 @@ void UpdateMovement(Snake &snake, sf::Clock &clock) {
 int main() {
     srand(static_cast<unsigned int>(time(NULL)));
     sf::RenderWindow window(sf::VideoMode(1000, 1000), "Snake the game");
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(65);
 
     sf::RectangleShape field[FIELD_SIZE][FIELD_SIZE];
     FillField(field);
@@ -266,11 +266,8 @@ int main() {
     sf::Font font;
     if (!font.loadFromFile("arial.ttf"))
     {
-        //return 1;
+
     }
-    
-    
-    
 
     sf::Text scoreText;
     scoreText.setFont(font);

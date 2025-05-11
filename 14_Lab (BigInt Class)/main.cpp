@@ -71,11 +71,11 @@ private:
         return result;
     }
 
-    bool AbsGreaterOrEqual(const BigInt& other) {
+    bool AbsGreaterOrEqual(const BigInt& other) { // Сравнивает по абсолютному значению 
         return !(this->AbsLess(other));
     }
 
-    BigInt& Sum(const BigInt& other) {
+    BigInt& Sum(const BigInt& other) { // Функция сложения двух БигИнтов
         CheckCapacity(other._length + 1);
         bool flag = true;
         short carry = 0;
@@ -116,7 +116,7 @@ private:
         return *this;
     }
 
-    BigInt& Subtraction(const BigInt& other) {
+    BigInt& Subtraction(const BigInt& other) { // Функция вычитания двух БигИнтов
         short minus_next = 0;
         for (int i = 0; i < other._length; i++) {
             short tmp = static_cast<short>((_data[i] - '0') - (other._data[i] - '0')) - minus_next;
@@ -155,7 +155,7 @@ private:
         return *this;
     }
 
-    BigInt& Multiplication(const BigInt& other) {
+    BigInt& Multiplication(const BigInt& other) { // Функция умножения двух БигИнтов
         short new_arr_len = _length + other._length;
         CheckCapacity(new_arr_len + 1);
         char* new_arr = new char[_capacity];
@@ -197,16 +197,16 @@ private:
     }
 
 public:
-    BigInt() = default;
+    BigInt() = default; // Стандартный коструктор
 
-    BigInt(size_t capacity, bool makeEmpty) {
+    BigInt(size_t capacity, bool makeEmpty) { // Конструктор, создающий не инициализированную переменную
         _capacity = capacity;
         _length = 0;
         _data = new char(_capacity);
         _data[0] = 0;
     }
 
-    BigInt(const char* number) {
+    BigInt(const char* number) { // Конструктор, берущий значение БигИнта из строки
         short start_point = 0;
         if (number[0] == '-') {
             _isNegative = true;
@@ -221,6 +221,7 @@ public:
             }
         }
         _capacity = _length + 8;
+        if (_data != nullptr) { delete[] _data; }
         _data = new char[_capacity];
         for (int i = _length - 1; i >= 0; i--) {
             _data[_length - i - 1] = number[i + start_point];
@@ -228,7 +229,7 @@ public:
         _data[_length] = 0;
     }
 
-    BigInt (size_t number) {
+    BigInt (size_t number) { // Конструктор, берущий значение БигИнта из числа
         _length = DigitLength(number);
         const char *char_number = FromNumberToString(number, _length);
         if (number < 0 ) { _isNegative = true; }
@@ -240,7 +241,7 @@ public:
         delete[] char_number;
     }
 
-    BigInt(const BigInt& other) {
+    BigInt(const BigInt& other) { // Конструктор копирования
         _isNegative = other._isNegative;
         _length = other._length;
         _capacity = other._capacity;
@@ -248,7 +249,7 @@ public:
         for (int i = 0; i < _length; i++) _data[i] = other._data[i];
     }
 
-    BigInt& operator=(const BigInt& other) {
+    BigInt& operator=(const BigInt& other) { // Оператор присваивания копированием
         _isNegative = other._isNegative;
         _length = other._length;
         _capacity = other._capacity;
@@ -259,7 +260,7 @@ public:
         return *this;
     }
 
-    ~BigInt() {
+    ~BigInt() { // Деструктор
         if (_data != nullptr) delete[] _data;
     }
 
@@ -269,7 +270,7 @@ public:
 
     size_t length() const { return _length; }
 
-    const char& operator[] (size_t index) const {
+    const char& operator[] (size_t index) const { // Возвращает символ по индексу (изменять нельзя, только считывать)
         if (0 <= index && index < _length) { return _data[index]; }
         else { return _data[0]; }
     }
@@ -280,7 +281,7 @@ public:
         fputc('\n', stdout);
     }
 
-    BigInt& operator+=(const BigInt& other) {
+    BigInt& operator+=(const BigInt& other) { // Оператор += для сложения БигИнта с БигИнтом
         if (!_isNegative && !other._isNegative) { return this->Sum(other); }
 
         else if (_isNegative && other._isNegative) { return this->Sum(other); }
@@ -304,7 +305,7 @@ public:
         }
     }
 
-    BigInt& operator+=(size_t number) {
+    BigInt& operator+=(size_t number) { // Оператор += для сложения БигИнта с числом
         BigInt other = number;
         if (!_isNegative && !other._isNegative) { return this->Sum(other); }
 
@@ -329,13 +330,13 @@ public:
         }
     }
 
-    BigInt operator+(const BigInt& other) {
+    BigInt operator+(const BigInt& other) { // Оператор + для сложения БигИнта с БигИнтом
         BigInt a = *this;
         a += other;
         return a;
     }
 
-    BigInt& operator-=(const BigInt& other) {
+    BigInt& operator-=(const BigInt& other) { // Оператор -= для вычитания БигИнта БигИнтом
         if (!_isNegative && !other._isNegative) { 
             if (this->AbsGreaterOrEqual(other)) { return this->Subtraction(other); }
             else {
@@ -366,7 +367,7 @@ public:
         else { return this->Sum(other); }
     }
 
-    BigInt& operator-=(size_t number) {
+    BigInt& operator-=(size_t number) { // Оператор -= для вычитания БигИнта числом
         BigInt other = number;
         if (!_isNegative && !other._isNegative) { 
             if (this->AbsGreaterOrEqual(other)) { return this->Subtraction(other); }
@@ -398,47 +399,47 @@ public:
         else { return this->Sum(other); }
     }
 
-    BigInt operator-(const BigInt other) {
+    BigInt operator-(const BigInt other) { // Оператор - для вычитания БигИнта БигИнтом
         BigInt a = *this;
         a -= other;
         return a;
     }
 
-    BigInt& operator*=(const BigInt& other) {
+    BigInt& operator*=(const BigInt& other) { // Оператор *= для умножения БигИнта БигИнтом
         if (other._isNegative) { _isNegative = !_isNegative; }
         return this->Multiplication(other);
     }
 
-    BigInt& operator*=(size_t number) {
+    BigInt& operator*=(size_t number) { // Оператор *= для умножения БигИнта числом
         BigInt other = number;
         if (other._isNegative) { _isNegative = !_isNegative; }
         return this->Multiplication(other);
     }
 
-    BigInt operator*(const BigInt& other) {
+    BigInt operator*(const BigInt& other) { // Оператор * для умножения БигИнта БигИнтом
         BigInt a = *this;
         a *= other;
         return a;
     }
 
-    BigInt operator++() { 
+    BigInt operator++(int) { // Оператор постфиксного инкремента (возвращает сначала старое значение, а потом прибавляет 1)
         BigInt copy = *this;
         *this += 1;
         return copy;
     }
 
-    BigInt& operator++(int) {
+    BigInt& operator++() { // Оператор префиксного инкремента (прибавляет 1 к бигинту и возвращает уже новое значение)
         *this += 1;
         return *this;
     }
 
-    BigInt operator--() {
+    BigInt operator--(int) {
         BigInt copy = *this;
         *this -= 1;
         return copy;
     }
 
-    BigInt& operator--(int) {
+    BigInt& operator--() { // int в скобочках нужен, чтобы компилятор мог различить две одинаковые по написанию функции 
         *this -= 1;
         return *this;
     }
@@ -596,32 +597,32 @@ public:
     }
 };
 
-BigInt operator+(size_t number, const BigInt& other) {
+BigInt operator+(size_t number, const BigInt& other) { // Оператор + для сложения числа с БигИнтом (предыдущие операторы + складывали наоборот, БигИнт с числом)
     BigInt a = number;
     a += other;
     return a;
 }
 
-BigInt operator-(size_t number, const BigInt& other) {
+BigInt operator-(size_t number, const BigInt& other) { // Оператор - для сложения числа с БигИнтом
     BigInt a = number;
     a -= other;
     return a;
 }
 
-BigInt operator*(size_t number, const BigInt& other) {
+BigInt operator*(size_t number, const BigInt& other) { // Оператор * для сложения числа с БигИнтом
     BigInt a = number;
     a *= other;
     return a;
 }
 
-std::istream& operator>>(std::istream& in, BigInt& other) {
+std::istream& operator>>(std::istream& in, BigInt& other) { // Перегрузка оператора >> чтобы через std::cin записывать значение сразу в БигИнт
     std::string s;
     in >> s;
     other = BigInt(s.data());
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const BigInt& other) {
+std::ostream& operator<<(std::ostream& out, const BigInt& other) { // Перегрузка оператора << чтобы через std::cout выводить значение БигИнта
     std::string s = "";
     if (other.isNegative()) { s += '-'; }
     for (int i = other.length() - 1; i >= 0; i--) s += other[i];
@@ -645,10 +646,10 @@ int main() {
     c += b;
     c -= a;
     c.print();
-
+    #if 0
     std::cin >> a >> b;
     std::cout << "a + b = " << a + b << "\na - b = " << a - b << "\na * b = " << a * b << std::endl;
     std::cout << (a < b) << " " << (a > b) <<  " " << (a != b) << std::endl;
-   
+   #endif
     return 0;
 }
